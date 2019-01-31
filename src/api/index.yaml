@@ -1,0 +1,121 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Vessels
+  description: |
+    The GFW Vessel API allows third parties to request aggregated information about vessels, such as identifiers, characteristics and tracks.
+
+definitions:
+  ValidationError:
+    type: object
+    required:
+      - fields
+      - general
+    properties:
+      fields:
+        type: array
+        items:
+          type: object
+          required:
+            - field
+            - errors
+          properties:
+            field:
+              type: string
+            errors:
+              type: array
+              items:
+                type: object
+                required:
+                  - code
+                  - description
+                properties:
+                  code:
+                    type: string
+                  description:
+                    type: string
+      general:
+        type: array
+        items:
+          type: object
+          required:
+            - code
+            - description
+          properties:
+            code:
+              type: string
+            description:
+              type: string
+
+responses:
+  BadRequest:
+    description: |
+      Bad request. Invalid or wrong parameters were provided.
+    schema:
+      $ref: '#/definitions/ValidationError'
+
+  Unauthorized:
+    description: |
+      Unauthorized, either the api key is invalid or expired.
+
+  NotFound:
+    description: |
+      Not found. Either the dataset does not exist, or the specific entity
+      which was requested does not exist.
+
+paths:
+
+  "/datasets/{dataset}/vessels":
+    get:
+      summary: |
+        Searches for vessels
+      description: |
+        Searches for a vessel given a free form query. The query will be matched against any identifiers for the vessel, and a paginated, ranked results list will be returned.
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: path
+          description: |
+            Name of the dataset you want to query
+          required: true
+          type: string
+      responses:
+        '200':
+          description: |
+            Expected response to a successful request.
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+
+  "/datasets/{dataset}/vessels/{vesselId}/tracks":
+    get:
+      summary: |
+        Gets the tracks of a single vessel
+      description: |
+        Obtains all the tracks of a single vessel.
+      produces:
+        - application/vnd.geo+json
+      parameters:
+        - name: dataset
+          in: path
+          description: |
+            Name of the dataset you want to query
+          required: true
+          type: string
+        - name: vesselId
+          in: path
+          description: |
+            Id of the vessel to get the tracks for
+          required: true
+          type: string
+      responses:
+        '200':
+          description: |
+            Expected resposne to a successful request.
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+

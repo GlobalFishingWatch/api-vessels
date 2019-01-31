@@ -1,0 +1,32 @@
+version: '2.4'
+services:
+  dev:
+    image: gfw/api-vessels
+    build:
+      context: .
+      target: development
+    env_file: ./dev/env
+    command: npm start
+    volumes:
+      - "./src:/opt/project/src"
+      - "./spec:/opt/project/spec"
+      - "./package.json:/opt/project/package.json"
+      - "./.eslintrc.js:/opt/project/.eslintrc.js"
+      - "./dev:/opt/project/dev"
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+
+  cloudsql:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.12 
+    command: "/cloud_sql_proxy -instances=world-fishing-827:us-east1:pipe-staging-events=tcp:0.0.0.0:5432 -credential_file=/credentials"
+    volumes:
+      - "./dev/key.json:/credentials"
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "3000:8080"
+    environment:
+      - URL=http://localhost:8080/api
