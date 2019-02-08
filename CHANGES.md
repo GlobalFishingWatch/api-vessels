@@ -7,3 +7,8 @@ Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+* [#887](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/887): Adds
+  vessel search and vessel information endpoints to the API.

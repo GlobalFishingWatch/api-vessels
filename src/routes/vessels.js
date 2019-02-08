@@ -1,4 +1,5 @@
 const datasets = require('../data/datasets');
+const vessels = require('../data/vessels');
 const tracks = require('../data/tracks');
 
 const loadDataset = async (req, res, next) => {
@@ -16,8 +17,20 @@ const loadDataset = async (req, res, next) => {
 };
 
 module.exports = (app) => {
-  app.get('/datasets/:dataset/vessels', loadDataset, (req, res) => {
-    res.sendStatus(200);
+  app.get('/datasets/:dataset/vessels', loadDataset, async (req, res, next) => {
+    try {
+      const query = {
+        query: req.swagger.params.query.value,
+        limit: req.swagger.params.limit.value,
+        offset: req.swagger.params.offset.value,
+      };
+
+      const results = await vessels(req.dataset).search(query);
+
+      return res.json(results);
+    } catch(error) {
+      return next(error);
+    }
   });
 
 

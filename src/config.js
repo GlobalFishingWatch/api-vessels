@@ -57,28 +57,20 @@ module.exports = {
     }),
   },
 
+  elasticsearch: {
+    server: entry({
+      key: 'ELASTICSEARCH_SERVER',
+      doc: 'ElasticSearch server URL to connect to. Should be a complete url to the root of the server, such as https://user:password@elasticsearch.skytruth.org',
+      required: true,
+    }),
+  },
+
   gcloud: {
     sql: {
       connectionString: entry({
         key: 'GCLOUD_SQL_CONNECTION_STRING',
         doc: 'Connection string for the postgis database',
         required: true,
-      }),
-    },
-
-    bigquery: {
-      projectId: entry({
-        key: 'GCLOUD_PROJECTID_BIGQUERY',
-        doc: 'Google cloud platform project id for the bigquery services.',
-        defaults: { development: 'world-fishing-827' },
-        required: true,
-      }),
-
-      keyFilename: entry({
-        key: 'GCLOUD_KEY_FILENAME',
-        doc: 'Location of the json key file for authorizing with the bigquery services',
-        defaults: { development: '/opt/project/dev/key.json' },
-        required: false,
       }),
     },
 

@@ -80,6 +80,27 @@ paths:
             Name of the dataset you want to query
           required: true
           type: string
+        - name: query
+          in: query
+          description: |
+            Search query.
+          required: true
+          type: string
+        - name: limit
+          in: query
+          description: |
+            Amount of search results to return. Maximum 25.
+          required: false
+          type: integer
+          maximum: 25
+          default: 10
+        - name: offset
+          in: query
+          description: |
+            Offset into the search results, used for pagination.
+          required: false
+          type: integer
+          default: 0
       responses:
         '200':
           description: |

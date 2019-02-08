@@ -1,5 +1,5 @@
 const Knex = require('knex');
-const config = require('../config');
+const config = require('../../config');
 
 module.exports = new Knex({
   client: 'pg',

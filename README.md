@@ -1,6 +1,6 @@
 # GFW API: Vessels
 
-REST API microservice to obtain aggregated vessel information
+REST API microservice to search and obtain aggregated vessel information.
 
 ## Tech stack
 
@@ -62,10 +62,11 @@ for that dataset. The following is an example of a dataset object:
 
 ```json
 {
+  "eventsTable": "indonesia_v20181029",
   "pipeline": "pipe_indonesia_production_v20181029",
-  "bigquery": {"
-    fishingTable": "world-fishing-827.pipe_indonesia_production_v20181029.published_events_fishing"
-  }
+  "tracksTable": "indonesia_v20181029_tracks",
+  "vesselIndex": "andres"-test-indonesia,
+  "vesselsTable": "indonesia_v20181029_vessels"
 }
 ```
 
@@ -75,7 +76,7 @@ inside [config.js](../src/config.js).
 
 To manage the datasets, you can use the built-in UI at the [google cloud web
 console](https://console.cloud.google.com/datastore/entities;kind=Dataset). You
-need to select the proper namespace
+need to select the proper namespace.
 
 
 ## License
@@ -89,3 +90,4 @@ applicable law or agreed to in writing, software distributed under the License
 is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
+
