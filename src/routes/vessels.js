@@ -33,6 +33,18 @@ module.exports = (app) => {
     }
   });
 
+  app.get('/datasets/:dataset/vessels/:vesselid', loadDataset, async (req, res, next) => {
+    try {
+      const vesselId = req.swagger.params.vesselId.value;
+
+      const result = await vessels(req.dataset).get(vesselId);
+
+      return res.json(result);
+    } catch(error) {
+      return next(error);
+    }
+  });
+
 
   app.get('/datasets/:dataset/vessels/:vesselId/tracks', loadDataset, async (req, res, next) => {
     try {
@@ -44,5 +56,5 @@ module.exports = (app) => {
     } catch(error) {
       return next(error);
     }
-  })
+  });
 };

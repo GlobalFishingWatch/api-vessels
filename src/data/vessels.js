@@ -40,10 +40,13 @@ module.exports = dataset => ({
   },
 
   get(vesselId) {
-    return elasticsearch.get({
-        index: dataset.vesselIndex,
-        type: 'vessel',
-        id: vesselId,
-      });
+    const identity = {
+      index: dataset.vesselIndex,
+      type: 'vessel',
+      id: vesselId,
+    };
+    return elasticsearch
+      .get(identity)
+      .then(transformSearchResult);
   },
 });

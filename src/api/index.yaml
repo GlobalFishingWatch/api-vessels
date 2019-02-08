@@ -110,6 +110,36 @@ paths:
         '400':
           $ref: '#/responses/BadRequest'
 
+  "/datasets/{dataset}/vessels/{vesselId}":
+    get:
+      summary: |
+        Obtains the characteristics of a single vessel
+      description: |
+        Obtains all the characteristics that describe a single vessel, such as its name and identifiers.
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: path
+          description: |
+            Name of the dataset you want to query
+          required: true
+          type: string
+        - name: vesselId
+          in: path
+          description: |
+            Id of the vessel to get the characteristics from
+          required: true
+          type: string
+      responses:
+        '200':
+          description: |
+            Expected resposne to a successful request.
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+
   "/datasets/{dataset}/vessels/{vesselId}/tracks":
     get:
       summary: |
