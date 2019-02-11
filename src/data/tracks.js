@@ -1,4 +1,4 @@
-const sql = require('../google/sql');
+const sql = require('../services/google/sql');
 
 module.exports = dataset => ({
   forVessel(vesselId) {

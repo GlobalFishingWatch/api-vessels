@@ -1,4 +1,4 @@
-const datastore = require('../google/datastore');
+const datastore = require('../services/google/datastore');
 const log = require('../data/log');
 
 const authorize = async (apiKey) => {
