@@ -161,6 +161,19 @@ paths:
             Id of the vessel to get the tracks for
           required: true
           type: string
+        - name: features
+          in: query
+          description: |
+            Comma-separated list of additional features to include in the
+            tracks, such as points classified as fishing, per-point speed and
+            courses, etc.
+          type: array
+          items:
+            type: string
+            enum:
+              - fishing
+              - speed
+              - course
       responses:
         '200':
           description: |
@@ -169,4 +182,3 @@ paths:
           $ref: '#/responses/Unauthorized'
         '400':
           $ref: '#/responses/BadRequest'
-
