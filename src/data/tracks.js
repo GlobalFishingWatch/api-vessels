@@ -8,19 +8,27 @@ const map = require('lodash/fp/map');
 const reduce = require('lodash/fp/reduce');
 const reject = require('lodash/fp/reject');
 const zip = require('lodash/fp/zip');
-const keys = require('lodash/fp/keys');
 const sql = require('../services/google/sql');
 const log = require('../data/log');
+
+const defaultAdditionalFeatureSettings = field => ({
+  extraFields: field,
+  updateCoordinateProperties: segment => coordinateProperties => ({
+    [field]: segment.field,
+    ...coordinateProperties,
+  }),
+  buildExtraGeoJSONFeatures: constant([]),
+});
 
 const additionalFeatureSettings = {
   fishing: {
     extraFields: 'scores',
-    updateCoordinateProperties: segment => identity,
-    buildExtraGeoJSONFeatures: segment => {
+    updateCoordinateProperties: () => identity,
+    buildExtraGeoJSONFeatures: (segment) => {
       const coordinates = flow(
         zip(segment.scores),
-        filter(([score, coordinate]) => score > 0.5),
-        map(([score, coordinate]) => coordinate),
+        filter(([score]) => score > 0.5),
+        map(([, coordinate]) => coordinate),
       )(segment.geojson.coordinates);
 
       if (isEmpty(coordinates)) {
@@ -28,36 +36,22 @@ const additionalFeatureSettings = {
       }
 
       return {
-        type: "Feature",
+        type: 'Feature',
         properties: {
           track: segment.id,
-          type: "fishing",
+          type: 'fishing',
         },
         geometry: {
-          type: "MultiPoint",
-            coordinates,
+          type: 'MultiPoint',
+          coordinates,
         },
       };
     },
   },
 
-  course: {
-    extraFields: 'courses',
-    updateCoordinateProperties: segment => coordinateProperties => ({
-      courses: segment.courses,
-      ...coordinateProperties,
-    }),
-    buildExtraGeoJSONFeatures: constant([]),
-  },
+  course: defaultAdditionalFeatureSettings('courses'),
 
-  speed: {
-    extraFields: 'speeds',
-    updateCoordinateProperties: segment => coordinateProperties => ({
-      speeds: segment.speeds,
-      ...coordinateProperties,
-    }),
-    buildExtraGeoJSONFeatures: constant([]),
-  },
+  speed: defaultAdditionalFeatureSettings('speeds'),
 };
 
 const segmentToGeoJSONTrack = (segment, extraFeatures = []) => {
@@ -66,16 +60,23 @@ const segmentToGeoJSONTrack = (segment, extraFeatures = []) => {
     geometry.type = 'LineString';
   }
 
-  const reduceCoordinateProperties = (result, feature) => feature
-    .updateCoordinateProperties(segment)(result);
+  const baseCoordinateProperties = {
+    times: map(date => new Date(date).getTime())(segment.times),
+  };
 
-  const coordinateProperties = reduce(reduceCoordinateProperties)({times: segment.times})(extraFeatures);
+  const coordinatePropertiesReducer = (result, feature) => (
+    feature.updateCoordinateProperties(segment)(result)
+  );
+
+  const reduceCoordinateProperties = reduce(coordinatePropertiesReducer)(baseCoordinateProperties);
+
+  const coordinateProperties = reduceCoordinateProperties(extraFeatures);
 
   return {
-    type: "Feature",
+    type: 'Feature',
     properties: {
       id: segment.id,
-      type: "track",
+      type: 'track',
       coordinateProperties,
     },
     geometry,
@@ -83,7 +84,7 @@ const segmentToGeoJSONTrack = (segment, extraFeatures = []) => {
 };
 
 const queryResultsToGeoJSON = (segments, extraFeatures) => {
-  log.debug("Query results available, converting to GeoJSON");
+  log.debug('Query results available, converting to GeoJSON');
   const features = flow(
     map(segment => ({
       ...segment,
@@ -97,7 +98,7 @@ const queryResultsToGeoJSON = (segments, extraFeatures) => {
   )(segments);
 
   return {
-    type: "FeatureCollection",
+    type: 'FeatureCollection',
     features,
   };
 };
@@ -114,10 +115,10 @@ module.exports = dataset => ({
         sql.raw('ST_AsGeoJSON("seg_geography") as "geojson"'),
         ...extraFeatures.map(feature => feature.extraFields),
       )
-      .from({tracks: dataset.tracksTable})
-      .innerJoin({vessels: dataset.vesselsTable}, "tracks.seg_id", "vessels.seg_id")
-      .where("vessels.vessel_id", vesselId);
+      .from({ tracks: dataset.tracksTable })
+      .innerJoin({ vessels: dataset.vesselsTable }, 'tracks.seg_id', 'vessels.seg_id')
+      .where('vessels.vessel_id', vesselId);
 
-    return query.then((segments) => queryResultsToGeoJSON(segments, extraFeatures));
+    return query.then(segments => queryResultsToGeoJSON(segments, extraFeatures));
   },
 });

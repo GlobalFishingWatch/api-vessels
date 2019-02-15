@@ -1,11 +1,12 @@
 const elasticsearch = require('../services/elasticsearch');
 
+// eslint-disable-next-line no-underscore-dangle
 const transformSearchResult = entry => entry._source;
 
 const calculateNextOffset = (query, results) => (
-  query.offset + query.limit <= results.hits.total ?
-    query.offset + query.limit :
-    null
+  query.offset + query.limit <= results.hits.total
+    ? query.offset + query.limit
+    : null
 );
 
 const transformSearchResults = query => results => ({
