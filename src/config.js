@@ -67,9 +67,24 @@ module.exports = {
 
   gcloud: {
     sql: {
-      connectionString: entry({
-        key: 'GCLOUD_SQL_CONNECTION_STRING',
-        doc: 'Connection string for the postgis database',
+      user: entry({
+        key: 'GCLOUD_SQL_USER',
+        doc: 'Google Cloud SQL username',
+        required: true,
+      }),
+      password: entry({
+        key: 'GCLOUD_SQL_PASSWORD',
+        doc: 'Google Cloud SQL password',
+        required: true,
+      }),
+      db: entry({
+        key: 'GCLOUD_SQL_DB',
+        doc: 'Google Cloud SQL database to connect to',
+        required: true,
+      }),
+      instance: entry({
+        key: 'GCLOUD_SQL_INSTANCE',
+        doc: 'Google Cloud SQL instance to connect to',
         required: true,
       }),
     },

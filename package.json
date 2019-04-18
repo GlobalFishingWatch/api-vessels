@@ -19,7 +19,7 @@
   "scripts": {
     "start": "per-env",
     "start:production": "node src/index.js",
-    "start:development": "nodemon --inspect -e js,yaml src/index.js",
+    "start:development": "nodemon --inspect=0.0.0.0 -e js,yaml src/index.js",
     "test": "eslint src && mocha --recursive ./spec/**/*.spec.js",
     "test:watch": "mocha --watch --reporter min --recursive ./spec/**/*.spec.js"
   },
