@@ -13,16 +13,19 @@ services:
       - "./package.json:/opt/project/package.json"
       - "./.eslintrc.js:/opt/project/.eslintrc.js"
       - "./dev:/opt/project/dev"
+      - "cloudsql-sockets:/cloudsql"
     ports:
       - "8080:8080"
+      - "9229:9229"
     environment:
       - NODE_ENV=development
 
   cloudsql:
     image: gcr.io/cloudsql-docker/gce-proxy:1.12 
-    command: "/cloud_sql_proxy -instances=world-fishing-827:us-east1:pipe-staging-events=tcp:0.0.0.0:5432 -credential_file=/credentials"
+    command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1-a:api -credential_file=/credentials -dir=/cloudsql"
     volumes:
       - "./dev/key.json:/credentials"
+      - "cloudsql-sockets:/cloudsql"
 
   swagger:
     image: swaggerapi/swagger-ui
@@ -30,3 +33,6 @@ services:
       - "3000:8080"
     environment:
       - URL=http://localhost:8080/api
+
+volumes:
+  cloudsql-sockets:
