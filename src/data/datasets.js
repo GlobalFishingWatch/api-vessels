@@ -1,16 +1,16 @@
-const datastore = require('../services/google/datastore');
+const datastore = require("../services/google/datastore");
 
-const datasetKind = 'Dataset';
+const datasetKind = "Dataset";
 
 module.exports = {
   fullyQualifiedId(id) {
-    const parts = id.split(':');
+    const parts = id.split(":");
 
     if (parts.length === 1) {
-      parts.push('latest');
+      parts.push("latest");
     }
 
-    return parts.join(':');
+    return parts.join(":");
   },
 
   list() {
@@ -21,8 +21,6 @@ module.exports = {
   get(id) {
     const actualId = this.fullyQualifiedId(id);
     const key = datastore.key([datasetKind, actualId]);
-    return datastore
-      .get(key)
-      .then(dataset => dataset[0]);
-  },
+    return datastore.get(key).then(dataset => dataset[0]);
+  }
 };

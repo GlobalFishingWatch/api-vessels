@@ -1,13 +1,12 @@
-const elasticsearch = require('../services/elasticsearch');
+const elasticsearch = require("../services/elasticsearch");
 
 // eslint-disable-next-line no-underscore-dangle
 const transformSearchResult = entry => entry._source;
 
-const calculateNextOffset = (query, results) => (
+const calculateNextOffset = (query, results) =>
   query.offset + query.limit <= results.hits.total
     ? query.offset + query.limit
-    : null
-);
+    : null;
 
 const transformSearchResults = query => results => ({
   query: query.query,
@@ -15,24 +14,24 @@ const transformSearchResults = query => results => ({
   limit: query.limit,
   offset: query.offset,
   nextOffset: calculateNextOffset(query, results),
-  entries: results.hits.hits.map(transformSearchResult),
+  entries: results.hits.hits.map(transformSearchResult)
 });
 
 module.exports = dataset => ({
   search(query) {
     const elasticSearchQuery = {
       index: dataset.vesselIndex,
-      type: 'vessel',
+      type: "vessel",
       from: query.offset || 0,
       size: query.limit || 10,
       body: {
         query: {
           query_string: {
             query: `*${query.query}*`,
-            allow_leading_wildcard: true,
-          },
-        },
-      },
+            allow_leading_wildcard: true
+          }
+        }
+      }
     };
 
     return elasticsearch
@@ -43,11 +42,9 @@ module.exports = dataset => ({
   get(vesselId) {
     const identity = {
       index: dataset.vesselIndex,
-      type: 'vessel',
-      id: vesselId,
+      type: "vessel",
+      id: vesselId
     };
-    return elasticsearch
-      .get(identity)
-      .then(transformSearchResult);
-  },
+    return elasticsearch.get(identity).then(transformSearchResult);
+  }
 });

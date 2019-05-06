@@ -8,7 +8,7 @@ RUN mkdir -p /opt/project
 WORKDIR /opt/project
 
 # Setup nodejs
-RUN install_node 10.13.0
+RUN install_node 10.15.3
 
 # Setup application dependencies
 copy package*.json /opt/project/

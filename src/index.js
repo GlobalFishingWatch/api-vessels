@@ -1,11 +1,11 @@
-const express = require('express');
-const log = require('./data/log');
-const swagger = require('./middleware/swagger');
-const cors = require('./middleware/cors');
-const logMiddleware = require('./middleware/log');
-const errors = require('./middleware/errors');
-const config = require('./config');
-const routes = require('./routes');
+const express = require("express");
+const log = require("./data/log");
+const swagger = require("./middleware/swagger");
+const cors = require("./middleware/cors");
+const logMiddleware = require("./middleware/log");
+const errors = require("./middleware/errors");
+const config = require("./config");
+const routes = require("./routes");
 
 const start = async () => {
   try {
