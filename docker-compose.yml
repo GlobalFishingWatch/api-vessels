@@ -11,9 +11,9 @@ services:
       - "./src:/opt/project/src"
       - "./spec:/opt/project/spec"
       - "./package.json:/opt/project/package.json"
-      - "./.eslintrc.js:/opt/project/.eslintrc.js"
       - "./dev:/opt/project/dev"
       - "cloudsql-sockets:/cloudsql"
+      - "~/.config/gcloud:/root/.config/gcloud"
     ports:
       - "8080:8080"
       - "9229:9229"
@@ -22,9 +22,9 @@ services:
 
   cloudsql:
     image: gcr.io/cloudsql-docker/gce-proxy:1.12 
-    command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1-a:api -credential_file=/credentials -dir=/cloudsql"
+    command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1-a:api -dir=/cloudsql"
     volumes:
-      - "./dev/key.json:/credentials"
+      - "~/.config/gcloud:/root/.config/gcloud"
       - "cloudsql-sockets:/cloudsql"
 
   swagger:
@@ -32,7 +32,7 @@ services:
     ports:
       - "3000:8080"
     environment:
-      - URL=http://localhost:8080/api
+      - URL=http://localhost:8080/openapi.json
 
 volumes:
   cloudsql-sockets:

@@ -1,7 +1,7 @@
 const api = require("../api");
 
 module.exports = app => {
-  app.get("/api", (req, res) => {
+  app.get("/openapi.json", (req, res) => {
     res.json(api);
   });
 };

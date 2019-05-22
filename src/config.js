@@ -36,7 +36,7 @@ module.exports = {
 
   server: {
     host: entry({
-      key: "SERVER_HOST",
+      key: "HOST",
       doc: "Protocol, host and port where the server is exposed to clients.",
       defaults: { development: "http://localhost:8080" },
       required: true
@@ -45,12 +45,12 @@ module.exports = {
     port: entry({
       key: "PORT",
       doc: "Port on which the server is exposed to clients.",
-      defaults: { all: 8080 },
+      defaults: { development: 8080 },
       required: true
     }),
 
     protocol: entry({
-      key: "SERVER_PROTOCOL",
+      key: "PROTOCOL",
       doc: "Protocol by which the server is exposed to clients.",
       defaults: { development: "http", production: "https" },
       required: true
@@ -92,24 +92,16 @@ module.exports = {
 
     datastore: {
       projectId: entry({
-        key: "GCLOUD_PROJECTID_DATASTORE",
+        key: "GCLOUD_DATASTORE_PROJECTID",
         doc: "Google cloud platform project id for the datastore services.",
         defaults: { development: "world-fishing-827" },
         required: true
       }),
 
-      keyFilename: entry({
-        key: "GCLOUD_KEY_FILENAME",
-        doc:
-          "Location of the json key file for authorizing with the datastore services",
-        defaults: { development: "/opt/project/dev/key.json" },
-        required: false
-      }),
-
       namespace: entry({
         key: "GCLOUD_DATASTORE_NAMESPACE",
         doc:
-          'Namespace to scope all datastore operations to. On development this should be set to something unique to the user, such as "andres--vessels-api"',
+          'Namespace to scope all datastore operations to. On development this should be set to something unique to the user, such as "andres--api"',
         required: true
       })
     }

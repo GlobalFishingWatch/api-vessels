@@ -20,11 +20,11 @@
     "start": "per-env",
     "start:production": "node src/index.js",
     "start:development": "nodemon --inspect=0.0.0.0 -e js,yaml src/index.js",
-    "test": "eslint src"
+    "test": "eslint src spec && mocha --recursive spec --extension spec.js",
+    "test:watch": "mocha --watch --reporter min --recursive spec --extension spec.js"
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.0",
-    "@mapbox/sphericalmercator": "^1.1.0",
     "cors": "^2.8.5",
     "elasticsearch": "^16.0.0",
     "express": "^4.16.4",
@@ -40,11 +40,23 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "eslint": "^5.3.0",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.2.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-prettier": "^3.0.1",
+    "mocha": "^6.0.0",
     "prettier": "^1.17.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "mocha": true
+    },
+    "extends": [
+      "airbnb-base",
+      "plugin:prettier/recommended"
+    ]
   }
 }
