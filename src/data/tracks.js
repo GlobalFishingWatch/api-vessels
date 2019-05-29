@@ -1,146 +1,103 @@
-const concat = require("lodash/fp/concat");
-const filter = require("lodash/fp/filter");
-const flatMap = require("lodash/fp/flatMap");
-const flow = require("lodash/fp/flow");
-const identity = require("lodash/fp/identity");
-const isEmpty = require("lodash/fp/isEmpty");
-const map = require("lodash/fp/map");
-const reduce = require("lodash/fp/reduce");
-const zipAll = require("lodash/fp/zipAll");
 const sql = require("../services/google/sql");
-const log = require("../data/log");
 
-const baseCoordinateProperties = times => ({
-  times: map(date => new Date(date).getTime())(times)
-});
-
-const buildAdditionalFeature = options => ({
-  extraFields: options.extraFields,
-  concatCoordinateProperties:
-    options.concatCoordinateProperties || (() => identity),
-  extractAdditionalGeoJSONFeatures:
-    options.extractAdditionalGeoJSONFeatures || (() => [])
-});
-
-const additionalFeaturesByName = {
-  fishing: buildAdditionalFeature({
-    extraFields: ["scores"],
-    extractAdditionalGeoJSONFeatures: segments => {
-      const timedCoordinates = flatMap(segment =>
-        flow(
-          zipAll,
-          filter(([score]) => score > 0.5),
-          map(([, time, coordinate]) => [time, coordinate])
-        )([segment.scores, segment.times, segment.geojson.coordinates])
-      )(segments);
-
-      if (isEmpty(timedCoordinates)) {
-        return [];
-      }
-
-      const times = map(([time]) => time)(timedCoordinates);
-      const coordinates = map(([, coordinate]) => coordinate)(timedCoordinates);
-
-      return [
-        {
-          type: "Feature",
-          properties: {
-            type: "fishing",
-            coordinateProperties: baseCoordinateProperties(times)
-          },
-          geometry: {
-            type: "MultiPoint",
-            coordinates
-          }
-        }
-      ];
-    }
-  }),
-
-  course: buildAdditionalFeature({
-    extraFields: ["courses"],
-    concatCoordinateProperties: segment => coordinateProperties => ({
-      courses: segment.courses,
-      ...coordinateProperties
-    })
-  }),
-
-  speed: buildAdditionalFeature({
-    extraFields: ["speeds"],
-    concatCoordinateProperties: segment => coordinateProperties => ({
-      speeds: segment.speeds,
-      ...coordinateProperties
-    })
-  })
+const featureSettings = {
+  times: {
+    coordinateProperty: "times",
+    property: "timestamp",
+    databaseField: "timestamp",
+    formatter: value => new Date(value).getTime()
+  },
+  fishing: {
+    coordinateProperty: "scores",
+    property: "score",
+    databaseField: "score",
+    formatter: value => value
+  },
+  course: {
+    coordinateProperty: "courses",
+    property: "course",
+    databaseField: "course",
+    formatter: value => value
+  },
+  speed: {
+    coordinateProperty: "speeds",
+    property: "speed",
+    databaseField: "speed",
+    formatter: value => value
+  }
 };
 
-const segmentToGeoJSONTrackFeature = additionalFeatures => segment => {
-  const geometry = segment.geojson;
-  if (geometry.coordinates.length > 1) {
-    geometry.type = "LineString";
-  }
-
-  const coordinateProperties = reduce((result, feature) =>
-    feature.concatCoordinateProperties(segment)(result)
-  )(baseCoordinateProperties(segment.times))(additionalFeatures);
+module.exports = ({ dataset, additionalFeatures = [] }) => {
+  const featureNames = ["times", ...additionalFeatures];
+  const features = featureNames.map(name => featureSettings[name]);
 
   return {
-    type: "Feature",
-    properties: {
-      id: segment.id,
-      type: "track",
-      coordinateProperties
+    load(vesselId) {
+      const additionalSelectFields = features.map(
+        feature => feature.databaseField
+      );
+
+      return sql
+        .select(
+          "seg_id",
+          sql.raw('ST_X("position"::geometry) AS "lon"'),
+          sql.raw('ST_Y("position"::geometry) AS "lat"'),
+          ...additionalSelectFields
+        )
+        .from(dataset.tracksTable)
+        .where("vessel_id", vesselId)
+        .orderBy(["seg_id", "timestamp"]);
     },
-    geometry
+
+    formatters: {
+      lines(records) {
+        const coordinates = records.map(record => [record.lon, record.lat]);
+
+        const coordinateProperties = features.reduce((result, feature) => {
+          const value = records.map(record =>
+            feature.formatter(record[feature.databaseField])
+          );
+          return {
+            ...result,
+            [feature.coordinateProperty]: value
+          };
+        }, {});
+
+        return {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates
+          },
+          coordinateProperties
+        };
+      },
+
+      points(records) {
+        const geoJSONFeatures = records.map(record => {
+          const properties = features.reduce((result, feature) => {
+            const value = feature.formatter(record[feature.databaseField]);
+            return {
+              ...result,
+              [feature.property]: value
+            };
+          }, {});
+
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [record.lon, record.lat]
+            },
+            properties
+          };
+        });
+
+        return {
+          type: "FeatureCollection",
+          features: geoJSONFeatures
+        };
+      }
+    }
   };
 };
-
-const queryResultsToGeoJSON = (segments, additionalFeatures) => {
-  log.debug("Query results available, converting to GeoJSON");
-  const features = concat(
-    map(segmentToGeoJSONTrackFeature(additionalFeatures))(segments),
-    flatMap(feature => feature.extractAdditionalGeoJSONFeatures(segments))(
-      additionalFeatures
-    )
-  );
-
-  return {
-    type: "FeatureCollection",
-    features
-  };
-};
-
-const parseSegmentGeoJSON = segment => ({
-  ...segment,
-  geojson: JSON.parse(segment.geojson)
-});
-
-module.exports = dataset => ({
-  forVessel(vesselId, additionalFeatureNames = []) {
-    log.debug(
-      `Looking up track for vessel ${vesselId} including features ${additionalFeatureNames}`
-    );
-    const additionalFeatures = map(name => additionalFeaturesByName[name])(
-      additionalFeatureNames
-    );
-
-    const query = sql
-      .select(
-        "tracks.seg_id as id",
-        "times",
-        sql.raw('ST_AsGeoJSON("seg_geography") as "geojson"'),
-        ...flatMap(feature => feature.extraFields)(additionalFeatures)
-      )
-      .from({ tracks: dataset.tracksTable })
-      .innerJoin(
-        { vessels: dataset.vesselsTable },
-        "tracks.seg_id",
-        "vessels.seg_id"
-      )
-      .where("vessels.vessel_id", vesselId);
-
-    return query
-      .then(segments => map(parseSegmentGeoJSON)(segments))
-      .then(segments => queryResultsToGeoJSON(segments, additionalFeatures));
-  }
-});

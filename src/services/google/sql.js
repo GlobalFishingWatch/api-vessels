@@ -1,5 +1,6 @@
 const Knex = require("knex");
 const config = require("../../config");
+const log = require("../../data/log");
 
 module.exports = new Knex({
   client: "pg",
@@ -9,5 +10,19 @@ module.exports = new Knex({
     database: config.gcloud.sql.db,
     host: `/cloudsql/${config.gcloud.sql.instance}`
   },
-  debug: true
+  debug: true,
+  log: {
+    warn(message) {
+      log.warn(message);
+    },
+    error(message) {
+      log.error(message);
+    },
+    deprecate(message) {
+      log.warn(message);
+    },
+    debug(message) {
+      log.debug(message);
+    }
+  }
 });

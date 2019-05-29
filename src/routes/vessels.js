@@ -67,12 +67,24 @@ module.exports = app => {
     async (req, res, next) => {
       try {
         const vesselId = req.swagger.params.vesselId.value;
+        const format = req.swagger.params.format.value;
+        const features = req.swagger.params.features.value;
+
+        log.debug(
+          `Configuring track loader for dataset ${
+            req.dataset
+          } using additional features ${features}`
+        );
+        const trackLoader = tracks({
+          dataset: req.dataset,
+          additionalFeatures: features
+        });
 
         log.debug(`Looking up track for vessel ${vesselId}`);
-        const result = await tracks(req.dataset).forVessel(
-          vesselId,
-          req.swagger.params.features.value
-        );
+        const records = await trackLoader.load(vesselId);
+
+        log.debug(`Converting the records to format ${format}`);
+        const result = trackLoader.formatters[format](records);
 
         log.debug(`Returning track for vessel ${vesselId}`);
         return res.json(result);

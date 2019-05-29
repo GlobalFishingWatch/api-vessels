@@ -12,4 +12,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 * [#965](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/965): Adds extra features and properties to the GeoJSON object returned in the tracks endpoints. This allows the client to require fishing geometries and per-coordinate data such as speed and course by sending a `features` parameter to the API.
 
 ### Changed
+* [#985](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/985): Changes the format in which the tracks are stored in the database. The GeoJSON for the tracks is now generated on the API, since the tables themselves contain raw positional messages.
 * [#975](https://github.com/GlobalFishingWatch/GFW-Tasks/issues/975): Changes the way the fishing feature is included in the tracks API. It is now a single feature containing all the fishing points, instead of a feature per tracks. Timestamps for each point are also included.
