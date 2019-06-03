@@ -20,8 +20,8 @@
     "start": "per-env",
     "start:production": "node src/index.js",
     "start:development": "nodemon --inspect=0.0.0.0 -e js,yaml src/index.js",
-    "test": "eslint src spec && mocha --recursive spec --extension spec.js",
-    "test:watch": "mocha --watch --reporter min --recursive spec --extension spec.js"
+    "test": "eslint src spec && NODE_ENV=test mocha --recursive spec --extension spec.js",
+    "test:watch": "NODE_ENV=test mocha --watch --reporter min --recursive spec --extension spec.js"
   },
   "dependencies": {
     "@google-cloud/datastore": "^3.1.0",
