@@ -46,7 +46,7 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
         )
         .from(dataset.tracksTable)
         .where("vessel_id", vesselId)
-        .orderBy(["seg_id", "timestamp"]);
+        .orderBy(["timestamp"]);
     },
 
     formatters: {
