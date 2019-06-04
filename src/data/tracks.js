@@ -8,8 +8,8 @@ const featureSettings = {
     formatter: value => new Date(value).getTime()
   },
   fishing: {
-    coordinateProperty: "scores",
-    property: "score",
+    coordinateProperty: "fishing",
+    property: "fishing",
     databaseField: "score",
     formatter: value => value
   },
@@ -63,13 +63,18 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
           };
         }, {});
 
-        return {
+        const geoJSONFeature = {
           type: "Feature",
           geometry: {
             type: "LineString",
             coordinates
           },
           coordinateProperties
+        };
+
+        return {
+          type: "FeatureCollection",
+          features: [geoJSONFeature]
         };
       },
 
