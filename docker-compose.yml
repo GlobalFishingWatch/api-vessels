@@ -22,7 +22,7 @@ services:
 
   cloudsql:
     image: gcr.io/cloudsql-docker/gce-proxy:1.12 
-    command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1-a:api -dir=/cloudsql"
+    command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1:api -dir=/cloudsql"
     volumes:
       - "~/.config/gcloud:/root/.config/gcloud"
       - "cloudsql-sockets:/cloudsql"
