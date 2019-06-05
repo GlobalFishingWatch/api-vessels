@@ -1,25 +1,46 @@
+const groupBy = require("lodash/fp/groupBy");
 const sql = require("../services/google/sql");
 
 const featureSettings = {
   times: {
+    generateGeoJSONFeatures: () => [],
     coordinateProperty: "times",
     property: "timestamp",
     databaseField: "timestamp",
     formatter: value => new Date(value).getTime()
   },
   fishing: {
-    coordinateProperty: "fishing",
+    generateGeoJSONFeatures: records => {
+      const coordinates = records
+        .filter(record => record.score > 0)
+        .map(record => [record.lon, record.lat]);
+
+      return [
+        {
+          type: "Feature",
+          properties: {
+            type: "fishing"
+          },
+          geometry: {
+            type: "MultiPoint",
+            coordinates
+          }
+        }
+      ];
+    },
     property: "fishing",
     databaseField: "score",
-    formatter: value => value
+    formatter: value => value > 0
   },
   course: {
+    generateGeoJSONFeatures: () => [],
     coordinateProperty: "courses",
     property: "course",
     databaseField: "course",
     formatter: value => value
   },
   speed: {
+    generateGeoJSONFeatures: () => [],
     coordinateProperty: "speeds",
     property: "speed",
     databaseField: "speed",
@@ -46,35 +67,55 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
         )
         .from(dataset.tracksTable)
         .where("vessel_id", vesselId)
-        .orderBy(["timestamp"]);
+        .orderBy(["seg_id", "timestamp"]);
     },
 
     formatters: {
       lines(records) {
-        const coordinates = records.map(record => [record.lon, record.lat]);
+        const segments = groupBy(record => record.seg_id)(records);
 
-        const coordinateProperties = features.reduce((result, feature) => {
-          const value = records.map(record =>
-            feature.formatter(record[feature.databaseField])
-          );
-          return {
-            ...result,
-            [feature.coordinateProperty]: value
-          };
-        }, {});
+        const trackGeoJSONFeatures = Object.entries(segments).map(
+          ([segment, segmentRecords]) => {
+            const coordinates = segmentRecords.map(record => [
+              record.lon,
+              record.lat
+            ]);
 
-        const geoJSONFeature = {
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates
-          },
-          coordinateProperties
-        };
+            const coordinateProperties = features.reduce((result, feature) => {
+              if (!feature.coordinateProperty) {
+                return result;
+              }
+              const value = segmentRecords.map(record =>
+                feature.formatter(record[feature.databaseField])
+              );
+              return {
+                ...result,
+                [feature.coordinateProperty]: value
+              };
+            }, {});
+
+            return {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates
+              },
+              properties: {
+                type: "track",
+                segId: segment,
+                coordinateProperties
+              }
+            };
+          }
+        );
+
+        const additioanlGeoJSONFeatures = features.reduce((result, feature) => {
+          return result.concat(feature.generateGeoJSONFeatures(records));
+        }, []);
 
         return {
           type: "FeatureCollection",
-          features: [geoJSONFeature]
+          features: [...trackGeoJSONFeatures, ...additioanlGeoJSONFeatures]
         };
       },
 
@@ -94,7 +135,10 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
               type: "Point",
               coordinates: [record.lon, record.lat]
             },
-            properties
+            properties: {
+              segId: record.seg_id,
+              ...properties
+            }
           };
         });
 
