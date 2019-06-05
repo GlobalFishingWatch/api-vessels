@@ -47,7 +47,114 @@ definitions:
             description:
               type: string
 
+  PaginatedVesselSearch:
+    required:
+      - entries
+      - limit
+      - nextOffset
+      - offset
+      - total
+      - query
+    properties:
+      entries:
+        type: array
+        items:
+          $ref: '#/definitions/Vessel'
+      limit:
+        type: number
+      nextOffset:
+        type: number
+      offset:
+        type: number
+      total:
+        type: number
+      query:
+        type: string
+
+  VesselTypes:
+    type: string
+    description: |
+      Specific vessel type
+    enum: &VESSEL_TYPES
+      - TBD
+
+  Vessel:
+    type: object
+    properties:
+     # New and desired properties for carrier portal
+      type:
+        type: string
+        enum: *VESSEL_TYPES
+      flag:
+        description: |
+          ISO code
+        type: string
+        minLength: 3
+        maxLength: 3
+      mmsi:
+        type: string
+      imo:
+        type: array
+        description: |
+          History of IMOs
+        items:
+          type: string
+      callsing:
+        type: string
+      authorizations:
+        description: |
+          History of authorizations
+        type: array
+        items:
+          type: object
+          properties:
+            rfmo:
+              type: string
+            startDate:
+              type: string
+            endDate:
+              type: string
+      # end of new and desired properties
+      end:
+        type: string
+      gearTypeBah:
+        type: string
+      gearTypeEng:
+        type: string
+      grossTonnage:
+        type: string
+      length:
+        type: number
+      name:
+        type: string
+      registeredFishingRegions:
+        type: string
+      registrationEndDate:
+        type: string
+      registrationStartDate:
+        type: string
+      ssvid:
+        type: string
+      start:
+        type: string
+      vesselId:
+        type: string
+      width:
+        type: number
+
 responses:
+  PaginatedVesselSearch:
+    description: |
+      Response of a valid search vessel request
+    schema:
+      $ref: '#/definitions/PaginatedVesselSearch'
+
+  VesselDetail:
+    description: |
+      Response of a valid vessel by id request
+    schema:
+      $ref: '#/definitions/Vessel'
+
   BadRequest:
     description: |
       Bad request. Invalid or wrong parameters were provided.
@@ -103,8 +210,36 @@ paths:
           default: 0
       responses:
         '200':
+          $ref: '#/responses/PaginatedVesselSearch'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+
+  "/datasets/{dataset}/vessels/{vesselId}":
+    get:
+      summary: |
+        Obtains the characteristics of a single vessel
+      description: |
+        Obtains all the characteristics that describe a single vessel, such as its name and identifiers.
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: path
           description: |
-            Expected response to a successful request.
+            Name of the dataset you want to query
+          required: true
+          type: string
+        - name: vesselId
+          in: path
+          description: |
+            Id of the vessel to get the characteristics from
+          required: true
+          type: string
+      responses:
+        '200':
+          $ref: '#/responses/VesselDetail'
         '401':
           $ref: '#/responses/Unauthorized'
         '400':
@@ -190,7 +325,7 @@ paths:
       responses:
         '200':
           description: |
-            Expected resposne to a successful request.
+            Expected response to a successful request.
         '401':
           $ref: '#/responses/Unauthorized'
         '400':
