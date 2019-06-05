@@ -7,19 +7,19 @@ describe("data/tracks", () => {
       it("returns valid geojson when no additional features are set", () => {
         const records = [
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z"
           },
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 61,
             timestamp: "2019-01-01T01:00:00.000Z"
           },
           {
-            segId: "seg2",
+            seg_id: "seg2",
             lon: 101,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z"
@@ -37,10 +37,29 @@ describe("data/tracks", () => {
               type: "Feature",
               geometry: {
                 type: "LineString",
-                coordinates: [[100, 60], [100, 61], [101, 60]]
+                coordinates: [[100, 60], [100, 61]]
               },
-              coordinateProperties: {
-                times: [1546300800000, 1546304400000, 1546300800000]
+              properties: {
+                coordinateProperties: {
+                  times: [1546300800000, 1546304400000]
+                },
+                type: "track",
+                segId: "seg1"
+              }
+            },
+
+            {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates: [[101, 60]]
+              },
+              properties: {
+                coordinateProperties: {
+                  times: [1546300800000]
+                },
+                type: "track",
+                segId: "seg2"
               }
             }
           ]
@@ -50,7 +69,7 @@ describe("data/tracks", () => {
       it("returns valid geojson when additional features are set", () => {
         const records = [
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z",
@@ -59,20 +78,20 @@ describe("data/tracks", () => {
             speed: 100
           },
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 61,
             timestamp: "2019-01-01T01:00:00.000Z",
-            score: 2,
+            score: 0,
             course: 20,
             speed: 200
           },
           {
-            segId: "seg2",
+            seg_id: "seg2",
             lon: 101,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z",
-            score: 3,
+            score: 1,
             course: 30,
             speed: 300
           }
@@ -89,13 +108,42 @@ describe("data/tracks", () => {
               type: "Feature",
               geometry: {
                 type: "LineString",
-                coordinates: [[100, 60], [100, 61], [101, 60]]
+                coordinates: [[100, 60], [100, 61]]
               },
-              coordinateProperties: {
-                times: [1546300800000, 1546304400000, 1546300800000],
-                fishing: [1, 2, 3],
-                courses: [10, 20, 30],
-                speeds: [100, 200, 300]
+              properties: {
+                coordinateProperties: {
+                  times: [1546300800000, 1546304400000],
+                  courses: [10, 20],
+                  speeds: [100, 200]
+                },
+                type: "track",
+                segId: "seg1"
+              }
+            },
+            {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates: [[101, 60]]
+              },
+              properties: {
+                coordinateProperties: {
+                  times: [1546300800000],
+                  courses: [30],
+                  speeds: [300]
+                },
+                type: "track",
+                segId: "seg2"
+              }
+            },
+            {
+              type: "Feature",
+              geometry: {
+                type: "MultiPoint",
+                coordinates: [[100, 60], [101, 60]]
+              },
+              properties: {
+                type: "fishing"
               }
             }
           ]
@@ -107,19 +155,19 @@ describe("data/tracks", () => {
       it("returns valid geojson when no additional features are set", () => {
         const records = [
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z"
           },
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 61,
             timestamp: "2019-01-01T01:00:00.000Z"
           },
           {
-            segId: "seg2",
+            seg_id: "seg2",
             lon: 101,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z"
@@ -136,17 +184,17 @@ describe("data/tracks", () => {
             {
               type: "Feature",
               geometry: { type: "Point", coordinates: [100, 60] },
-              properties: { timestamp: 1546300800000 }
+              properties: { segId: "seg1", timestamp: 1546300800000 }
             },
             {
               type: "Feature",
               geometry: { type: "Point", coordinates: [100, 61] },
-              properties: { timestamp: 1546304400000 }
+              properties: { segId: "seg1", timestamp: 1546304400000 }
             },
             {
               type: "Feature",
               geometry: { type: "Point", coordinates: [101, 60] },
-              properties: { timestamp: 1546300800000 }
+              properties: { segId: "seg2", timestamp: 1546300800000 }
             }
           ]
         });
@@ -155,7 +203,7 @@ describe("data/tracks", () => {
       it("returns valid geojson when additional features are set", () => {
         const records = [
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z",
@@ -164,20 +212,20 @@ describe("data/tracks", () => {
             speed: 100
           },
           {
-            segId: "seg1",
+            seg_id: "seg1",
             lon: 100,
             lat: 61,
             timestamp: "2019-01-01T01:00:00.000Z",
-            score: 2,
+            score: 0,
             course: 20,
             speed: 200
           },
           {
-            segId: "seg2",
+            seg_id: "seg2",
             lon: 101,
             lat: 60,
             timestamp: "2019-01-01T00:00:00.000Z",
-            score: 3,
+            score: 1,
             course: 30,
             speed: 300
           }
@@ -194,8 +242,9 @@ describe("data/tracks", () => {
               type: "Feature",
               geometry: { type: "Point", coordinates: [100, 60] },
               properties: {
+                segId: "seg1",
                 timestamp: 1546300800000,
-                fishing: 1,
+                fishing: true,
                 course: 10,
                 speed: 100
               }
@@ -204,8 +253,9 @@ describe("data/tracks", () => {
               type: "Feature",
               geometry: { type: "Point", coordinates: [100, 61] },
               properties: {
+                segId: "seg1",
                 timestamp: 1546304400000,
-                fishing: 2,
+                fishing: false,
                 course: 20,
                 speed: 200
               }
@@ -214,8 +264,9 @@ describe("data/tracks", () => {
               type: "Feature",
               geometry: { type: "Point", coordinates: [101, 60] },
               properties: {
+                segId: "seg2",
                 timestamp: 1546300800000,
-                fishing: 3,
+                fishing: true,
                 course: 30,
                 speed: 300
               }
