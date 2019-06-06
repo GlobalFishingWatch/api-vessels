@@ -1,6 +1,25 @@
 const groupBy = require("lodash/fp/groupBy");
 const sql = require("../services/google/sql");
 
+const extractCoordinates = records => {
+  return records.map(record => [record.lon, record.lat]);
+};
+
+const extractCoordinateProperties = (features, records) => {
+  return features.reduce((result, feature) => {
+    if (!feature.coordinateProperty) {
+      return result;
+    }
+    const value = records.map(record =>
+      feature.formatter(record[feature.databaseField])
+    );
+    return {
+      ...result,
+      [feature.coordinateProperty]: value
+    };
+  }, {});
+};
+
 const featureSettings = {
   times: {
     generateGeoJSONFeatures: () => [],
@@ -10,16 +29,20 @@ const featureSettings = {
     formatter: value => new Date(value).getTime()
   },
   fishing: {
-    generateGeoJSONFeatures: records => {
-      const coordinates = records
-        .filter(record => record.score > 0)
-        .map(record => [record.lon, record.lat]);
+    generateGeoJSONFeatures: (features, records) => {
+      const fishingRecords = records.filter(record => record.score > 0);
+      const coordinates = extractCoordinates(fishingRecords);
+      const coordinateProperties = extractCoordinateProperties(
+        features,
+        fishingRecords
+      );
 
       return [
         {
           type: "Feature",
           properties: {
-            type: "fishing"
+            type: "fishing",
+            coordinateProperties
           },
           geometry: {
             type: "MultiPoint",
@@ -76,23 +99,11 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
 
         const trackGeoJSONFeatures = Object.entries(segments).map(
           ([segment, segmentRecords]) => {
-            const coordinates = segmentRecords.map(record => [
-              record.lon,
-              record.lat
-            ]);
-
-            const coordinateProperties = features.reduce((result, feature) => {
-              if (!feature.coordinateProperty) {
-                return result;
-              }
-              const value = segmentRecords.map(record =>
-                feature.formatter(record[feature.databaseField])
-              );
-              return {
-                ...result,
-                [feature.coordinateProperty]: value
-              };
-            }, {});
+            const coordinates = extractCoordinates(segmentRecords);
+            const coordinateProperties = extractCoordinateProperties(
+              features,
+              segmentRecords
+            );
 
             return {
               type: "Feature",
@@ -110,7 +121,9 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
         );
 
         const additioanlGeoJSONFeatures = features.reduce((result, feature) => {
-          return result.concat(feature.generateGeoJSONFeatures(records));
+          return result.concat(
+            feature.generateGeoJSONFeatures(features, records)
+          );
         }, []);
 
         return {
