@@ -143,7 +143,12 @@ describe("data/tracks", () => {
                 coordinates: [[100, 60], [101, 60]]
               },
               properties: {
-                type: "fishing"
+                type: "fishing",
+                coordinateProperties: {
+                  times: [1546300800000, 1546300800000],
+                  courses: [10, 30],
+                  speeds: [100, 300]
+                }
               }
             }
           ]
