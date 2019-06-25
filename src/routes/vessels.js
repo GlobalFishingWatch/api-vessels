@@ -7,14 +7,12 @@ const loadDataset = async (req, res, next) => {
   try {
     const datasetId = req.swagger.params.dataset.value;
 
-    log.debug(`Looking up dataset ${datasetId}`);
+    log.debug(`Loading dataset ${datasetId}`);
     const dataset = await datasets.get(datasetId);
     if (!dataset) {
-      log.debug("Dataset not found");
+      log.debug(`Unable to load dataset ${datasetId}`);
       return res.sendStatus(404);
     }
-
-    log.debug("Dataset found", dataset);
     req.dataset = dataset;
     return next();
   } catch (err) {

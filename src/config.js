@@ -58,6 +58,17 @@ module.exports = greenpeace.sanitizeEnvironment(environments, {
     })
   },
 
+  platform: {
+    settingsServer: greenpeace.entry({
+      key: "PLATFORM_SETTINGS_SERVER",
+      doc: "Protocol, host and port of the settings API",
+      defaults: {
+        development: "https://settings.api.dev.globalfishingwatch.org"
+      },
+      required: true
+    })
+  },
+
   gcloud: {
     sql: {
       user: greenpeace.entry({
@@ -81,23 +92,6 @@ module.exports = greenpeace.sanitizeEnvironment(environments, {
       instance: greenpeace.entry({
         key: "GCLOUD_SQL_INSTANCE",
         doc: "Google Cloud SQL instance to connect to",
-        defaults: { test: "dummy" },
-        required: true
-      })
-    },
-
-    datastore: {
-      projectId: greenpeace.entry({
-        key: "GCLOUD_DATASTORE_PROJECTID",
-        doc: "Google cloud platform project id for the datastore services.",
-        defaults: { development: "world-fishing-827" },
-        required: true
-      }),
-
-      namespace: greenpeace.entry({
-        key: "GCLOUD_DATASTORE_NAMESPACE",
-        doc:
-          'Namespace to scope all datastore operations to. On development this should be set to something unique to the user, such as "andres--api"',
         defaults: { test: "dummy" },
         required: true
       })
