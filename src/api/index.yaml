@@ -65,7 +65,7 @@ responses:
 
 paths:
 
-  "/datasets/{dataset}/vessels":
+  "/datasets/{datasets}/vessels":
     get:
       summary: |
         Searches for vessels
@@ -74,12 +74,14 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: dataset
+        - name: datasets
           in: path
           description: |
-            Name of the dataset you want to query
+            Comma-separated list of datasets to query. Duplicated entries are not allowed.
           required: true
-          type: string
+          type: array
+          items:
+            type: string
         - name: query
           in: query
           description: |
@@ -110,7 +112,7 @@ paths:
         '400':
           $ref: '#/responses/BadRequest'
 
-  "/datasets/{dataset}/vessels/{vesselId}":
+  "/datasets/{datasets}/vessels/{vesselId}":
     get:
       summary: |
         Obtains the characteristics of a single vessel
@@ -119,12 +121,14 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: dataset
+        - name: datasets
           in: path
           description: |
-            Name of the dataset you want to query
+            Comma-separated list of datasets to query. Duplicated entries are not allowed.
           required: true
-          type: string
+          type: array
+          items:
+            type: string
         - name: vesselId
           in: path
           description: |

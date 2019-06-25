@@ -3,7 +3,7 @@ const vessels = require("../data/vessels");
 const tracks = require("../data/tracks");
 const log = require("../data/log");
 
-const loadDataset = async (req, res, next) => {
+const loadSingleDataset = async (req, res, next) => {
   try {
     const datasetId = req.swagger.params.dataset.value;
 
@@ -20,39 +20,42 @@ const loadDataset = async (req, res, next) => {
   }
 };
 
-module.exports = app => {
-  app.get("/datasets/:dataset/vessels", loadDataset, async (req, res, next) => {
-    try {
-      const query = {
-        query: req.swagger.params.query.value,
-        limit: req.swagger.params.limit.value,
-        offset: req.swagger.params.offset.value
-      };
+const loadMultipleDatasets = async (req, res, next) => {
+  try {
+    const datasetIds = req.swagger.params.datasets.value;
 
-      log.debug("Querying vessels search index");
-      const results = await vessels(req.dataset).search(query);
-
-      log.debug(
-        `Returning ${results.entries.length} / ${results.total} results`
-      );
-      return res.json(results);
-    } catch (error) {
-      return next(error);
+    log.debug(`Loading datasets ${datasetIds}`);
+    const multipleDatasets = await datasets.getMultiple(datasetIds);
+    if (!multipleDatasets) {
+      log.debug(`Unable to load datasets ${datasetIds}`);
+      return res.sendStatus(404);
     }
-  });
+    req.datasets = multipleDatasets;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+};
 
+module.exports = app => {
   app.get(
-    "/datasets/:dataset/vessels/:vesselid",
-    loadDataset,
+    "/datasets/:dataset/vessels",
+    loadMultipleDatasets,
     async (req, res, next) => {
       try {
-        const vesselId = req.swagger.params.vesselId.value;
+        const query = {
+          query: req.swagger.params.query.value,
+          limit: req.swagger.params.limit.value,
+          offset: req.swagger.params.offset.value
+        };
 
-        log.debug(`Looking up vessel information for vessel ${vesselId}`);
-        const result = await vessels(req.dataset).get(vesselId);
+        log.debug("Querying vessels search index");
+        const results = await vessels(req.datasets).search(query);
 
-        log.debug("Returning vessel information");
-        return res.json(result);
+        log.debug(
+          `Returning ${results.entries.length} / ${results.total} results`
+        );
+        return res.json(results);
       } catch (error) {
         return next(error);
       }
@@ -60,8 +63,29 @@ module.exports = app => {
   );
 
   app.get(
+    "/datasets/:dataset/vessels/:vesselid",
+    loadMultipleDatasets,
+    async (req, res, next) => {
+      try {
+        const vesselId = req.swagger.params.vesselId.value;
+
+        log.debug(`Looking up vessel information for vessel ${vesselId}`);
+        const result = await vessels(req.datasets).get(vesselId);
+
+        log.debug("Returning vessel information");
+        return res.json(result);
+      } catch (error) {
+        if (error.statusCode && error.statusCode === 404) {
+          return res.sendStatus(404);
+        }
+        return next(error);
+      }
+    }
+  );
+
+  app.get(
     "/datasets/:dataset/vessels/:vesselId/tracks",
-    loadDataset,
+    loadSingleDataset,
     async (req, res, next) => {
       try {
         const vesselId = req.swagger.params.vesselId.value;
