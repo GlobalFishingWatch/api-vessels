@@ -65,23 +65,21 @@ responses:
 
 paths:
 
-  "/datasets/{datasets}/vessels":
+  "/tilesets/{tileset}/vessels":
     get:
       summary: |
         Searches for vessels
       description: |
-        Searches for a vessel given a free form query. The query will be matched against any identifiers for the vessel, and a paginated, ranked results list will be returned.
+        Searches for a vessel given a free form query.The query will be matched against any identifiers for the vessel, and a paginated, ranked results list will be returned. This endpoint only returns vessels associated with a given tileset.
       produces:
         - application/json
       parameters:
-        - name: datasets
+        - name: tileset
           in: path
           description: |
-            Comma-separated list of datasets to query. Duplicated entries are not allowed.
+            Tileset to look the vessel from
           required: true
-          type: array
-          items:
-            type: string
+          type: string
         - name: query
           in: query
           description: |
@@ -112,7 +110,7 @@ paths:
         '400':
           $ref: '#/responses/BadRequest'
 
-  "/datasets/{datasets}/vessels/{vesselId}":
+  "/tilesets/{tileset}/vessels/{vesselId}":
     get:
       summary: |
         Obtains the characteristics of a single vessel
@@ -121,14 +119,87 @@ paths:
       produces:
         - application/json
       parameters:
-        - name: datasets
+        - name: tileset
           in: path
           description: |
-            Comma-separated list of datasets to query. Duplicated entries are not allowed.
+            Tileset to query the vessel from
           required: true
-          type: array
-          items:
-            type: string
+          type: string
+        - name: vesselId
+          in: path
+          description: |
+            Id of the vessel to get the characteristics from
+          required: true
+          type: string
+      responses:
+        '200':
+          description: |
+            Expected resposne to a successful request.
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+
+  "/datasets/{dataset}/vessels":
+    get:
+      summary: |
+        Searches for vessels
+      description: |
+        Searches for a vessel given a free form query. The query will be matched against any identifiers for the vessel, and a paginated, ranked results list will be returned.
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: path
+          description: |
+            Dataset to query vessels from
+          required: true
+          type: string
+        - name: query
+          in: query
+          description: |
+            Search query.
+          required: true
+          type: string
+        - name: limit
+          in: query
+          description: |
+            Amount of search results to return. Maximum 25.
+          required: false
+          type: integer
+          maximum: 25
+          default: 10
+        - name: offset
+          in: query
+          description: |
+            Offset into the search results, used for pagination.
+          required: false
+          type: integer
+          default: 0
+      responses:
+        '200':
+          description: |
+            Expected response to a successful request.
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '400':
+          $ref: '#/responses/BadRequest'
+
+  "/datasets/{dataset}/vessels/{vesselId}":
+    get:
+      summary: |
+        Obtains the characteristics of a single vessel
+      description: |
+        Obtains all the characteristics that describe a single vessel, such as its name and identifiers.
+      produces:
+        - application/json
+      parameters:
+        - name: dataset
+          in: path
+          description: |
+            Dataset to query the vessel from
+          required: true
+          type: string
         - name: vesselId
           in: path
           description: |

@@ -1,33 +1,44 @@
+/* eslint-disable no-underscore-dangle */
 const elasticsearch = require("../services/elasticsearch");
 const log = require("./log");
 
-// eslint-disable-next-line no-underscore-dangle
-const transformSearchResult = entry => entry._source;
+const transformSearchResult = source => entry => {
+  const baseFields = source.tileset
+    ? { tilesetId: source.tileset }
+    : { dataset: source.dataset.name };
+
+  return {
+    id: entry._id,
+    ...entry._source,
+    ...baseFields
+  };
+};
 
 const calculateNextOffset = (query, results) =>
   query.offset + query.limit <= results.hits.total
     ? query.offset + query.limit
     : null;
 
-const transformSearchResults = query => results => ({
+const transformSearchResults = ({ query, source }) => results => ({
   query: query.query,
   total: results.hits.total,
   limit: query.limit,
   offset: query.offset,
   nextOffset: calculateNextOffset(query, results),
-  entries: results.hits.hits.map(transformSearchResult)
+  entries: results.hits.hits.map(transformSearchResult(source))
 });
 
-module.exports = datasets => {
-  const indices = datasets.map(dataset => dataset.vesselIndex).join(",");
+module.exports = source => {
+  const index = source.dataset
+    ? source.dataset.vesselIndex
+    : source.tileset.toLowerCase();
 
-  log.debug(`Using elasticsearch indices ${indices}`);
+  log.debug(`Searching in elasticsearch index ${index}`);
 
   return {
     search(query) {
       const elasticSearchQuery = {
-        index: indices,
-        type: "vessel",
+        index,
         from: query.offset || 0,
         size: query.limit || 10,
         body: {
@@ -42,16 +53,16 @@ module.exports = datasets => {
 
       return elasticsearch
         .search(elasticSearchQuery)
-        .then(transformSearchResults(query));
+        .then(transformSearchResults({ query, source }));
     },
 
     get(vesselId) {
       const identity = {
-        index: indices,
+        index,
         type: "vessel",
         id: vesselId
       };
-      return elasticsearch.get(identity).then(transformSearchResult);
+      return elasticsearch.get(identity).then(transformSearchResult(source));
     }
   };
 };
