@@ -1,107 +1,100 @@
-const environment = process.env.NODE_ENV || 'development';
+const greenpeace = require("./greenpeace");
 
-const errorMessage = (key, doc) => (
-  `You need to configure the environment variable ${key}. ${doc}`
-);
+const environments = {
+  development: {
+    inherits: ["all"]
+  },
 
-const entry = (options) => {
-  let value = process.env[options.key];
+  test: {
+    inherits: ["development", "all"]
+  },
 
-  if (value === undefined && options.defaults) {
-    value = options.defaults[environment];
+  production: {
+    inherits: ["all"]
   }
-
-  if (value === undefined && options.defaults) {
-    value = options.defaults.all;
-  }
-
-  if (value === undefined && options.required) {
-    throw errorMessage(options.key, options.doc);
-  }
-
-  return value;
 };
 
-module.exports = {
-  environment,
-
+module.exports = greenpeace.sanitizeEnvironment(environments, {
   log: {
-    level: entry({
-      key: 'LOG_LEVEL',
-      doc: 'Logging level. In increasing amount of logs: error, warn, info, verbose, debug, silly',
-      defaults: { development: 'debug', production: 'warn' },
-      required: true,
-    }),
+    level: greenpeace.entry({
+      key: "LOG_LEVEL",
+      doc:
+        "Logging level. In increasing amount of logs: error, warn, info, verbose, debug, silly",
+      defaults: { development: "debug", production: "warn" },
+      required: true
+    })
   },
 
   server: {
-    host: entry({
-      key: 'SERVER_HOST',
-      doc: 'Protocol, host and port where the server is exposed to clients.',
-      defaults: { development: 'http://localhost:8080' },
-      required: true,
+    host: greenpeace.entry({
+      key: "HOST",
+      doc: "Protocol, host and port where the server is exposed to clients.",
+      defaults: { development: "http://localhost:8080" },
+      required: true
     }),
 
-    port: entry({
-      key: 'PORT',
-      doc: 'Port on which the server is exposed to clients.',
-      defaults: { all: 8080 },
-      required: true,
+    port: greenpeace.entry({
+      key: "PORT",
+      doc: "Port on which the server is exposed to clients.",
+      defaults: { development: 8080 },
+      required: true
     }),
 
-    protocol: entry({
-      key: 'SERVER_PROTOCOL',
-      doc: 'Protocol by which the server is exposed to clients.',
-      defaults: { development: 'http', production: 'https' },
-      required: true,
-    }),
+    protocol: greenpeace.entry({
+      key: "PROTOCOL",
+      doc: "Protocol by which the server is exposed to clients.",
+      defaults: { development: "http", production: "https" },
+      required: true
+    })
+  },
+
+  elasticsearch: {
+    server: greenpeace.entry({
+      key: "ELASTICSEARCH_SERVER",
+      doc:
+        "ElasticSearch server URL to connect to. Should be a complete url to the root of the server, such as https://user:password@elasticsearch.skytruth.org",
+      defaults: { test: "dummy" },
+      required: true
+    })
+  },
+
+  platform: {
+    settingsServer: greenpeace.entry({
+      key: "PLATFORM_SETTINGS_SERVER",
+      doc: "Protocol, host and port of the settings API",
+      defaults: {
+        development: "https://settings.api.dev.globalfishingwatch.org"
+      },
+      required: true
+    })
   },
 
   gcloud: {
     sql: {
-      connectionString: entry({
-        key: 'GCLOUD_SQL_CONNECTION_STRING',
-        doc: 'Connection string for the postgis database',
-        required: true,
+      user: greenpeace.entry({
+        key: "GCLOUD_SQL_USER",
+        doc: "Google Cloud SQL username",
+        defaults: { test: "dummy" },
+        required: true
       }),
-    },
-
-    bigquery: {
-      projectId: entry({
-        key: 'GCLOUD_PROJECTID_BIGQUERY',
-        doc: 'Google cloud platform project id for the bigquery services.',
-        defaults: { development: 'world-fishing-827' },
-        required: true,
+      password: greenpeace.entry({
+        key: "GCLOUD_SQL_PASSWORD",
+        doc: "Google Cloud SQL password",
+        defaults: { test: "dummy" },
+        required: true
       }),
-
-      keyFilename: entry({
-        key: 'GCLOUD_KEY_FILENAME',
-        doc: 'Location of the json key file for authorizing with the bigquery services',
-        defaults: { development: '/opt/project/dev/key.json' },
-        required: false,
+      db: greenpeace.entry({
+        key: "GCLOUD_SQL_DB",
+        doc: "Google Cloud SQL database to connect to",
+        defaults: { test: "dummy" },
+        required: true
       }),
-    },
-
-    datastore: {
-      projectId: entry({
-        key: 'GCLOUD_PROJECTID_DATASTORE',
-        doc: 'Google cloud platform project id for the datastore services.',
-        defaults: { development: 'world-fishing-827' },
-        required: true,
-      }),
-
-      keyFilename: entry({
-        key: 'GCLOUD_KEY_FILENAME',
-        doc: 'Location of the json key file for authorizing with the datastore services',
-        defaults: { development: '/opt/project/dev/key.json' },
-        required: false,
-      }),
-
-      namespace: entry({
-        key: 'GCLOUD_DATASTORE_NAMESPACE',
-        doc: 'Namespace to scope all datastore operations to. On development this should be set to something unique to the user, such as "andres--vessels-api"',
-        required: true,
-      }),
-    },
-  },
-};
+      instance: greenpeace.entry({
+        key: "GCLOUD_SQL_INSTANCE",
+        doc: "Google Cloud SQL instance to connect to",
+        defaults: { test: "dummy" },
+        required: true
+      })
+    }
+  }
+});

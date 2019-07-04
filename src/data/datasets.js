@@ -1,28 +1,41 @@
-const datastore = require('../google/datastore');
-
-const datasetKind = 'Dataset';
+const request = require("request-promise");
+const { StatusCodeError } = require("request-promise/errors");
+const config = require("../config");
 
 module.exports = {
-  fullyQualifiedId(id) {
-    const parts = id.split(':');
+  async get(id) {
+    try {
+      const response = await request({
+        baseUrl: config.platform.settingsServer,
+        uri: `/datasets/${id}`,
+        json: true
+      });
 
-    if (parts.length === 1) {
-      parts.push('latest');
+      return response;
+    } catch (err) {
+      if (err instanceof StatusCodeError && err.statusCode === 404) {
+        return undefined;
+      }
+
+      throw err;
     }
-
-    return parts.join(':');
   },
 
-  list() {
-    const query = datastore.createQuery(datasetKind);
-    return datastore.runQuery(query);
-  },
+  async getMultiple(ids) {
+    try {
+      const response = await request({
+        baseUrl: config.platform.settingsServer,
+        uri: `/datasets?ids=${ids.join(",")}`,
+        json: true
+      });
 
-  get(id) {
-    const actualId = this.fullyQualifiedId(id);
-    const key = datastore.key([datasetKind, actualId]);
-    return datastore
-      .get(key)
-      .then(dataset => dataset[0]);
-  },
+      return response;
+    } catch (err) {
+      if (err instanceof StatusCodeError && err.statusCode === 404) {
+        return undefined;
+      }
+
+      throw err;
+    }
+  }
 };
