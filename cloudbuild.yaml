@@ -13,7 +13,7 @@ steps:
 
   # Deploy to the appropriate environment
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['beta', 'run', 'deploy', '$_RUN_SERVICE_NAME', '--image', 'gcr.io/world-fishing-827/github.com/globalfishingwatch/api-vessels:$COMMIT_SHA', '--region', '$_RUN_REGION']
+    args: ['beta', 'run', 'deploy', '$_RUN_SERVICE_NAME', '--project', '$_RUN_PROJECT', '--image', 'gcr.io/world-fishing-827/github.com/globalfishingwatch/api-vessels:$COMMIT_SHA', '--region', '$_RUN_REGION', '--platform', 'managed']
 
 images:
   - 'gcr.io/world-fishing-827/github.com/globalfishingwatch/api-vessels:$COMMIT_SHA'
