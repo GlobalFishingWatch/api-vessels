@@ -20,7 +20,7 @@ module.exports = greenpeace.sanitizeEnvironment(environments, {
       key: "LOG_LEVEL",
       doc:
         "Logging level. In increasing amount of logs: error, warn, info, verbose, debug, silly",
-      defaults: { development: "debug", production: "warn" },
+      defaults: { all: "debug" },
       required: true
     })
   },
