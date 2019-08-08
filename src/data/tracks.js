@@ -1,4 +1,5 @@
 const groupBy = require("lodash/fp/groupBy");
+const flow = require("lodash/fp/flow");
 const sql = require("../services/google/sql");
 
 const extractCoordinates = records => {
@@ -71,7 +72,18 @@ const featureSettings = {
   }
 };
 
-module.exports = ({ dataset, additionalFeatures = [] }) => {
+const optionalFilter = (value, filter) => (value ? filter : query => query);
+
+const filtersFromParams = params => [
+  optionalFilter(params.startDate, query =>
+    query.where("timestamp", ">", params.startDate)
+  ),
+  optionalFilter(params.endDate, query =>
+    query.where("timestamp", "<", params.endDate)
+  )
+];
+
+module.exports = ({ dataset, additionalFeatures = [], params }) => {
   const featureNames = ["times", ...additionalFeatures];
   const features = featureNames.map(name => featureSettings[name]);
 
@@ -80,8 +92,7 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
       const additionalSelectFields = features.map(
         feature => feature.databaseField
       );
-
-      return sql
+      const baseQuery = sql
         .select(
           "seg_id",
           sql.raw('ST_X("position"::geometry) AS "lon"'),
@@ -91,6 +102,8 @@ module.exports = ({ dataset, additionalFeatures = [] }) => {
         .from(dataset.tracksTable)
         .where("vessel_id", vesselId)
         .orderBy(["seg_id", "timestamp"]);
+
+      return flow(...filtersFromParams(params))(baseQuery);
     },
 
     formatters: {
