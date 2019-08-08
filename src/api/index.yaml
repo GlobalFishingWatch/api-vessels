@@ -249,6 +249,20 @@ paths:
               - fishing
               - speed
               - course
+        - name: startDate
+          in: query
+          description: |
+            Temporary filter for the track, will return only the paths of the track
+            which happened after this moment
+          type: string
+          format: date-time
+        - name: endDate
+          in: query
+          description: |
+            Temporary filter for the track, will return only the paths of the track
+            which happened before this moment
+          type: string
+          format: date-time
         - name: format
           in: query
           description: |
