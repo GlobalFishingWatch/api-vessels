@@ -21,7 +21,7 @@ services:
       - NODE_ENV=development
 
   cloudsql:
-    image: gcr.io/cloudsql-docker/gce-proxy:1.12 
+    image: gcr.io/cloudsql-docker/gce-proxy:1.12
     command: "/cloud_sql_proxy -instances=world-fishing-827:us-central1:api -dir=/cloudsql"
     volumes:
       - "~/.config/gcloud:/root/.config/gcloud"
@@ -30,7 +30,7 @@ services:
   swagger:
     image: swaggerapi/swagger-ui
     ports:
-      - "3000:8080"
+      - "${PORT-3000}:8080"
     environment:
       - URL=http://localhost:8080/openapi.json
 

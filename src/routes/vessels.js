@@ -109,6 +109,10 @@ module.exports = app => {
     async (req, res, next) => {
       try {
         const vesselId = req.swagger.params.vesselId.value;
+        const params = {
+          startDate: req.swagger.params.startDate.value,
+          endDate: req.swagger.params.endDate.value
+        };
         const format = req.swagger.params.format.value;
         const features = req.swagger.params.features.value;
 
@@ -119,7 +123,8 @@ module.exports = app => {
         );
         const trackLoader = tracks({
           dataset: req.dataset,
-          additionalFeatures: features
+          additionalFeatures: features,
+          params
         });
 
         log.debug(`Looking up track for vessel ${vesselId}`);

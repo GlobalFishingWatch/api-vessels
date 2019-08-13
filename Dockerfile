@@ -14,7 +14,7 @@ CMD ["npm", "start"]
 ENV NODE_ENV=production
 
 # Setup application dependencies
-copy package*.json /opt/project/
+COPY package*.json /opt/project/
 RUN npm --unsafe-perm install --only production
 
 # Setup the application code
