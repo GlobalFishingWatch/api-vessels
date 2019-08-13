@@ -18,6 +18,7 @@ COPY package*.json /opt/project/
 RUN npm --unsafe-perm install --only production
 
 # Setup the application code
+COPY .eslintrc.json /opt/project/
 COPY src /opt/project/src
 
 ################################################################################

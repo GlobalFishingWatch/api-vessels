@@ -11,6 +11,7 @@ services:
       - "./src:/opt/project/src"
       - "./spec:/opt/project/spec"
       - "./package.json:/opt/project/package.json"
+      - "./.eslintrc.json:/opt/project/.eslintrc.json"
       - "./dev:/opt/project/dev"
       - "cloudsql-sockets:/cloudsql"
       - "~/.config/gcloud:/root/.config/gcloud"
