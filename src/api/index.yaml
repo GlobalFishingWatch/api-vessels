@@ -107,10 +107,21 @@ definitions:
           - track
       coordinateProperties:
         description: |
-          list of timestamps of each segment position
+          list of features requested in the track of each segment position,
+          by default only includes times but also available courses and speeds
         type: object
+        required:
+          - times
         properties:
           times:
+            type: array
+            items:
+              type: number
+          courses:
+            type: array
+            items:
+              type: number
+          speed:
             type: array
             items:
               type: number
