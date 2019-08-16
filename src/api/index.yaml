@@ -143,6 +143,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Feature'
+
 responses:
   BadRequest:
     description: |
@@ -182,6 +183,13 @@ paths:
             Search query.
           required: true
           type: string
+        - name: queryFields
+          in: query
+          description: |
+            List of fields to match with the search query instead of the entire object property
+          type: array
+          items:
+            type: string
         - name: limit
           in: query
           description: |
@@ -257,6 +265,13 @@ paths:
             Search query.
           required: true
           type: string
+        - name: queryFields
+          in: query
+          description: |
+            List of fields to match with the search query instead of the entire object property
+          type: array
+          items:
+            type: string
         - name: limit
           in: query
           description: |

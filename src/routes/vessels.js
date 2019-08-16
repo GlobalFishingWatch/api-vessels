@@ -26,7 +26,8 @@ module.exports = app => {
       const query = {
         query: req.swagger.params.query.value,
         limit: req.swagger.params.limit.value,
-        offset: req.swagger.params.offset.value
+        offset: req.swagger.params.offset.value,
+        queryFields: req.swagger.params.queryFields.value
       };
 
       log.debug("Querying vessels search index");
@@ -67,7 +68,8 @@ module.exports = app => {
       const query = {
         query: req.swagger.params.query.value,
         limit: req.swagger.params.limit.value,
-        offset: req.swagger.params.offset.value
+        offset: req.swagger.params.offset.value,
+        queryFields: req.swagger.params.queryFields.value
       };
 
       log.debug("Querying vessels search index");
