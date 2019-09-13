@@ -45,7 +45,8 @@ module.exports = source => {
           query: {
             query_string: {
               query: `*${query.query}*`,
-              allow_leading_wildcard: true
+              allow_leading_wildcard: true,
+              ...(query.queryFields && { fields: query.queryFields })
             }
           }
         }

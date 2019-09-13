@@ -26,7 +26,8 @@ module.exports = app => {
       const query = {
         query: req.swagger.params.query.value,
         limit: req.swagger.params.limit.value,
-        offset: req.swagger.params.offset.value
+        offset: req.swagger.params.offset.value,
+        queryFields: req.swagger.params.queryFields.value
       };
 
       log.debug("Querying vessels search index");
@@ -67,7 +68,8 @@ module.exports = app => {
       const query = {
         query: req.swagger.params.query.value,
         limit: req.swagger.params.limit.value,
-        offset: req.swagger.params.offset.value
+        offset: req.swagger.params.offset.value,
+        queryFields: req.swagger.params.queryFields.value
       };
 
       log.debug("Querying vessels search index");
@@ -109,6 +111,10 @@ module.exports = app => {
     async (req, res, next) => {
       try {
         const vesselId = req.swagger.params.vesselId.value;
+        const params = {
+          startDate: req.swagger.params.startDate.value,
+          endDate: req.swagger.params.endDate.value
+        };
         const format = req.swagger.params.format.value;
         const features = req.swagger.params.features.value;
 
@@ -119,7 +125,8 @@ module.exports = app => {
         );
         const trackLoader = tracks({
           dataset: req.dataset,
-          additionalFeatures: features
+          additionalFeatures: features,
+          params
         });
 
         log.debug(`Looking up track for vessel ${vesselId}`);

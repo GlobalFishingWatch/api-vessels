@@ -47,6 +47,103 @@ definitions:
             description:
               type: string
 
+  GeometryCollection:
+    type: object
+    description: Geojson geometry collection
+    required:
+      - type
+      - geometry
+    externalDocs:
+      url: http://geojson.org/geojson-spec.html#geometrycollection
+    discriminator: type
+    properties:
+      type:
+        type: string
+        description: the geometry type
+        enum:
+          - Point
+          - LineString
+          - Polygon
+          - MultiPoint
+          - MultiLineString
+          - MultiPolygon
+      geometry:
+        type: object
+
+  Feature:
+    type: object
+    description: Geojson Feature
+    required:
+      - type
+      - geometry
+      - properties
+    externalDocs:
+      url: https://tools.ietf.org/html/rfc7946#section-3.2
+    properties:
+      type:
+        type: string
+        enum:
+          - Feature
+      id:
+        type: string
+      geometry:
+        $ref: '#/definitions/GeometryCollection'
+      properties:
+        $ref: '#/definitions/FeatureProperties'
+
+  FeatureProperties:
+    type: object
+    properties:
+      segId:
+        description: |
+          unique identifier of the event segment
+        type: string
+      type:
+        description: |
+          type of the event that the feature represents
+        type: string
+        enum:
+          - fishing
+          - track
+      coordinateProperties:
+        description: |
+          list of features requested in the track of each segment position,
+          by default only includes times but also available courses and speeds
+        type: object
+        required:
+          - times
+        properties:
+          times:
+            type: array
+            items:
+              type: number
+          courses:
+            type: array
+            items:
+              type: number
+          speed:
+            type: array
+            items:
+              type: number
+
+  GeojsonTrack:
+    type: object
+    description: Geojson Feature collection
+    required:
+      - type
+      - features
+    externalDocs:
+      url: https://tools.ietf.org/html/rfc7946#section-3.3
+    properties:
+      type:
+        type: string
+        enum:
+          - FeatureCollection
+      features:
+        type: array
+        items:
+          $ref: '#/definitions/Feature'
+
 responses:
   BadRequest:
     description: |
@@ -86,6 +183,13 @@ paths:
             Search query.
           required: true
           type: string
+        - name: queryFields
+          in: query
+          description: |
+            List of fields to match with the search query instead of the entire object property
+          type: array
+          items:
+            type: string
         - name: limit
           in: query
           description: |
@@ -161,6 +265,13 @@ paths:
             Search query.
           required: true
           type: string
+        - name: queryFields
+          in: query
+          description: |
+            List of fields to match with the search query instead of the entire object property
+          type: array
+          items:
+            type: string
         - name: limit
           in: query
           description: |
@@ -249,6 +360,20 @@ paths:
               - fishing
               - speed
               - course
+        - name: startDate
+          in: query
+          description: |
+            Temporary filter for the track, will return only the paths of the track
+            which happened after this moment
+          type: string
+          format: date-time
+        - name: endDate
+          in: query
+          description: |
+            Temporary filter for the track, will return only the paths of the track
+            which happened before this moment
+          type: string
+          format: date-time
         - name: format
           in: query
           description: |
@@ -266,6 +391,8 @@ paths:
         '200':
           description: |
             Expected resposne to a successful request.
+          schema:
+            $ref: '#/definitions/GeojsonTrack'
         '401':
           $ref: '#/responses/Unauthorized'
         '400':
