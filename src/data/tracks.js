@@ -2,8 +2,25 @@ const groupBy = require("lodash/fp/groupBy");
 const flow = require("lodash/fp/flow");
 const sql = require("../services/google/sql");
 
-const extractCoordinates = records => {
-  return records.map(record => [record.lon, record.lat]);
+const extractCoordinates = (records, wrapLongitudes) => {
+  if (wrapLongitudes === false) {
+    // Hack for renderes like mapbox gl or leaflet to fix antimeridian issues
+    // https://macwright.org/2016/09/26/the-180th-meridian.html
+    let currentLng;
+    let lngOffset = 0;
+    return records.map(({ lon, lat }) => {
+      if (currentLng) {
+        if (lon - currentLng < -180) {
+          lngOffset += 360;
+        } else if (lon - currentLng > 180) {
+          lngOffset -= 360;
+        }
+      }
+      currentLng = lon;
+      return [lon + lngOffset, lat];
+    });
+  }
+  return records.map(({ lon, lat }) => [lon, lat]);
 };
 
 const extractCoordinateProperties = (features, records) => {
@@ -30,9 +47,12 @@ const featureSettings = {
     formatter: value => new Date(value).getTime()
   },
   fishing: {
-    generateGeoJSONFeatures: (features, records) => {
+    generateGeoJSONFeatures: (features, records, params) => {
       const fishingRecords = records.filter(record => record.score > 0);
-      const coordinates = extractCoordinates(fishingRecords);
+      const coordinates = extractCoordinates(
+        fishingRecords,
+        params.wrapLongitudes
+      );
       const coordinateProperties = extractCoordinateProperties(
         features,
         fishingRecords
@@ -112,7 +132,10 @@ module.exports = ({ dataset, additionalFeatures = [], params }) => {
 
         const trackGeoJSONFeatures = Object.entries(segments).map(
           ([segment, segmentRecords]) => {
-            const coordinates = extractCoordinates(segmentRecords);
+            const coordinates = extractCoordinates(
+              segmentRecords,
+              params.wrapLongitudes
+            );
             const coordinateProperties = extractCoordinateProperties(
               features,
               segmentRecords
@@ -135,7 +158,7 @@ module.exports = ({ dataset, additionalFeatures = [], params }) => {
 
         const additioanlGeoJSONFeatures = features.reduce((result, feature) => {
           return result.concat(
-            feature.generateGeoJSONFeatures(features, records)
+            feature.generateGeoJSONFeatures(features, records, params)
           );
         }, []);
 
