@@ -387,6 +387,13 @@ paths:
             - lines
             - points
           default: lines
+        - name: wrapLongitudes
+          in: query
+          description: |
+            Specific longitued response to use longitudes above and below 180 and -180 and avoid antimeridian
+            rendering issues (https://macwright.org/2016/09/26/the-180th-meridian.html)
+          type: boolean
+          default: true
       responses:
         '200':
           description: |
