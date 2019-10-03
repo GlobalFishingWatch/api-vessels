@@ -395,7 +395,7 @@ paths:
             This should be false if you are using an atlantic-centered visualization, such as QGis, or when
             using leaflet or mapbox to render the track. See https://macwright.org/2016/09/26/the-180th-meridian.html.
           type: boolean
-          default: true
+          default: false
       responses:
         '200':
           description: |
