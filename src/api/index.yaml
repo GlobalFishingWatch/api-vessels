@@ -390,8 +390,10 @@ paths:
         - name: wrapLongitudes
           in: query
           description: |
-            Specific longitued response to use longitudes above and below 180 and -180 and avoid antimeridian
-            rendering issues (https://macwright.org/2016/09/26/the-180th-meridian.html)
+            When false, deviate from the geojson standard and don't wrap longitudes between [-180, 180],
+            so that tracks going over the antimeridean line don't reset back to the negated longitudes.
+            This should be false if you are using an atlantic-centered visualization, such as QGis, or when
+            using leaflet or mapbox to render the track. See https://macwright.org/2016/09/26/the-180th-meridian.html.
           type: boolean
           default: true
       responses:
