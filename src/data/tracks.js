@@ -47,7 +47,7 @@ const featureSettings = {
     formatter: value => new Date(value).getTime()
   },
   fishing: {
-    generateGeoJSONFeatures: (features, records, params) => {
+    generateGeoJSONFeatures: (features, records, params = {}) => {
       const fishingRecords = records.filter(record => record.score > 0);
       const coordinates = extractCoordinates(
         fishingRecords,
@@ -103,7 +103,7 @@ const filtersFromParams = params => [
   )
 ];
 
-module.exports = ({ dataset, additionalFeatures = [], params }) => {
+module.exports = ({ dataset, additionalFeatures = [], params = {} }) => {
   const featureNames = ["times", ...additionalFeatures];
   const features = featureNames.map(name => featureSettings[name]);
 
