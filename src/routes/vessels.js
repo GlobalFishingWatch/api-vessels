@@ -113,7 +113,8 @@ module.exports = app => {
         const vesselId = req.swagger.params.vesselId.value;
         const params = {
           startDate: req.swagger.params.startDate.value,
-          endDate: req.swagger.params.endDate.value
+          endDate: req.swagger.params.endDate.value,
+          wrapLongitudes: req.swagger.params.wrapLongitudes.value
         };
         const format = req.swagger.params.format.value;
         const features = req.swagger.params.features.value;
